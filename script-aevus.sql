@@ -2,7 +2,7 @@ create database if not exists aevus;
 use aevus;
 
 
-drop database aevus;
+-- drop database aevus;
 
 CREATE TABLE IF NOT EXISTS Empresa (
   idEmpresa INT AUTO_INCREMENT,
