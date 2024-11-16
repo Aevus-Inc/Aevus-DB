@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS Aeroporto (
   siglaAeroporto VARCHAR(255),
   nomeAeroporto VARCHAR(100),
   endereco VARCHAR(235),
-  classificacao INT CHECK (classificacao BETWEEN 1 AND 5),
   Empresa_idEmpresa INT,
   PRIMARY KEY (idAeroporto),
   INDEX fk_Aeroporto_Empresa1_idx (Empresa_idEmpresa ASC) VISIBLE,
@@ -81,6 +80,7 @@ CREATE TABLE IF NOT EXISTS PesquisaDeSatisfacao (
     Aeroporto_idAeroporto INT,
     Mes VARCHAR(255),
     DataPesquisa date,
+    Satisfacao_Geral INT CHECK ( Satisfacao_Geral BETWEEN 1 AND 5),
     FOREIGN KEY (Passageiro_ID) REFERENCES Passageiro(Passageiro_ID),
     FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto)
 );
