@@ -1,7 +1,6 @@
 create database if not exists aevus;
 use aevus;
 
-
 -- drop database aevus;
 
 CREATE TABLE IF NOT EXISTS Empresa (
@@ -9,11 +8,27 @@ CREATE TABLE IF NOT EXISTS Empresa (
   nomeFantasia VARCHAR(45),
   cnpj CHAR(14),
   razaoSocial VARCHAR(100),
+  email varchar(100) not null,
+  senha varchar(30) not null,
   status VARCHAR(255) DEFAULT 'Ativo',
   PRIMARY KEY (idEmpresa),
   UNIQUE INDEX razaoSocial_UNIQUE (razaoSocial ASC) VISIBLE,
-  UNIQUE INDEX cnpj_UNIQUE (cnpj ASC) VISIBLE
+  UNIQUE INDEX cnpj_UNIQUE (cnpj ASC) VISIBLE,
+  constraint uk_email unique (email),
+  constraint uk_cpj unique (cnpj)
 );
+
+CREATE TABLE IF NOT EXISTS Funcionario (
+    idFuncionario INT AUTO_INCREMENT,
+    nome VARCHAR(100),
+    cargo VARCHAR(100),
+    telefone VARCHAR(100),
+    email VARCHAR(100),
+    idSupervisor INT,
+    PRIMARY KEY (idFuncionario),
+    FOREIGN KEY (idSupervisor) REFERENCES Funcionario(idFuncionario)
+);
+
 
 CREATE TABLE IF NOT EXISTS Pessoa (
   idPessoa INT AUTO_INCREMENT,
@@ -199,6 +214,7 @@ CREATE TABLE IF NOT EXISTS Estacionamento (
     Tempo_Espera_Onibus_Deslocamento_Estacionamento_Terminais INT CHECK (Tempo_Espera_Onibus_Deslocamento_Estacionamento_Terminais BETWEEN 1 AND 5),
     FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
 );
+
 
 CREATE TABLE IF NOT EXISTS Conforto_Acessibilidade (
     Conforto_ID INT AUTO_INCREMENT PRIMARY KEY,
