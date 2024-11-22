@@ -1,18 +1,21 @@
-create database if not exists aevus;
-use aevus;
+CREATE DATABASE IF NOT EXISTS aevus;
+USE aevus;
 
-
--- drop database aevus;
+-- DROP DATABASE aevus;
 
 CREATE TABLE IF NOT EXISTS Empresa (
   idEmpresa INT AUTO_INCREMENT,
   nomeFantasia VARCHAR(45),
   cnpj CHAR(14),
   razaoSocial VARCHAR(100),
+  email VARCHAR(100) NOT NULL,
+  senha VARCHAR(30) NOT NULL,
+  tipoUsuario VARCHAR(30) DEFAULT 'Empresa',
   status VARCHAR(255) DEFAULT 'Ativo',
   PRIMARY KEY (idEmpresa),
-  UNIQUE INDEX razaoSocial_UNIQUE (razaoSocial ASC) VISIBLE,
-  UNIQUE INDEX cnpj_UNIQUE (cnpj ASC) VISIBLE
+  UNIQUE INDEX razaoSocial_UNIQUE (razaoSocial ASC),
+  UNIQUE INDEX cnpj_UNIQUE (cnpj ASC),
+  CONSTRAINT uk_email UNIQUE (email)
 );
 
 CREATE TABLE IF NOT EXISTS Pessoa (
@@ -23,16 +26,17 @@ CREATE TABLE IF NOT EXISTS Pessoa (
 );
 
 CREATE TABLE IF NOT EXISTS Usuario (
-    idFuncionario INT AUTO_INCREMENT PRIMARY KEY,
+    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100),
     email VARCHAR(254) UNIQUE,
     cpf CHAR(11) UNIQUE,
-    tipoFuncionario VARCHAR(255) DEFAULT 'Operacional',
+    tipoUsuario VARCHAR(255) DEFAULT 'Operacional',
     senha VARCHAR(255),
     dataContratacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(255) DEFAULT 'Ativo',
     fkPessoa INT,
-    FOREIGN KEY (fkPessoa) REFERENCES Pessoa(idPessoa) ON DELETE SET NULL
+    FOREIGN KEY (fkPessoa) REFERENCES Pessoa(idPessoa) ON DELETE SET NULL,
+    CONSTRAINT ck_tipoUsuario CHECK (tipoUsuario IN ('Operacional', 'Administrador'))
 );
 
 CREATE TABLE IF NOT EXISTS Aeroporto (
@@ -40,21 +44,12 @@ CREATE TABLE IF NOT EXISTS Aeroporto (
   siglaAeroporto VARCHAR(255),
   nomeAeroporto VARCHAR(100),
   endereco VARCHAR(235),
+  classificacao INT CHECK (classificacao BETWEEN 1 AND 5),
   Empresa_idEmpresa INT,
   PRIMARY KEY (idAeroporto),
-  INDEX fk_Aeroporto_Empresa1_idx (Empresa_idEmpresa ASC) VISIBLE,
+  INDEX fk_Aeroporto_Empresa1_idx (Empresa_idEmpresa ASC),
   CONSTRAINT fk_Aeroporto_Empresa1
   FOREIGN KEY (Empresa_idEmpresa) REFERENCES Empresa(idEmpresa) ON DELETE SET NULL
-);
-
-CREATE TABLE IF NOT EXISTS RelacaoAeroporto_Funcionario (
-    Aeroporto_idAeroporto INT,
-    Funcionario_idFuncionario INT,
-    dataInicio DATETIME,
-    dataFim DATETIME,
-    PRIMARY KEY (Aeroporto_idAeroporto, Funcionario_idFuncionario),
-    FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto) ON DELETE CASCADE,
-    FOREIGN KEY (Funcionario_idFuncionario) REFERENCES Usuario(idFuncionario) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Passageiro (
@@ -83,16 +78,6 @@ CREATE TABLE IF NOT EXISTS PesquisaDeSatisfacao (
     Satisfacao_Geral INT CHECK ( Satisfacao_Geral BETWEEN 1 AND 5),
     FOREIGN KEY (Passageiro_ID) REFERENCES Passageiro(Passageiro_ID),
     FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto)
-);
-
-CREATE TABLE IF NOT EXISTS RelacaoAeroporto_Pesquisa (
-    idPesquisaDeSatisfacao INT,
-    Aeroporto_idAeroporto INT,
-    Data VARCHAR(45),
-    Relatorio TEXT NULL,
-    PRIMARY KEY (idPesquisaDeSatisfacao, Aeroporto_idAeroporto),
-    FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto),
-    FOREIGN KEY (idPesquisaDeSatisfacao) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
 );
 
 CREATE TABLE IF NOT EXISTS Informacoes_Voo (
@@ -267,4 +252,4 @@ select * from Estabelecimentos;
 select * from Estacionamento;
 select * from Conforto_Acessibilidade;
 select * from Sanitarios;
-select * from Restituicao_Bagagens;
+select * from Restituicao_Bagagens
