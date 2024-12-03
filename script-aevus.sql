@@ -1,7 +1,5 @@
-CREATE DATABASE IF NOT EXISTS aevus;
-USE aevus;
-
--- DROP DATABASE aevus;
+create database if not exists aevus;
+use aevus;
 
 CREATE TABLE IF NOT EXISTS Empresa (
   idEmpresa INT AUTO_INCREMENT,
@@ -18,40 +16,59 @@ CREATE TABLE IF NOT EXISTS Empresa (
   CONSTRAINT uk_email UNIQUE (email)
 );
 
+
 CREATE TABLE IF NOT EXISTS Pessoa (
   idPessoa INT AUTO_INCREMENT,
   nome VARCHAR(100),
   cpf CHAR(11) UNIQUE,
   PRIMARY KEY (idPessoa)
 );
-
-CREATE TABLE IF NOT EXISTS Usuario (
-    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100),
-    email VARCHAR(254) UNIQUE,
-    cpf CHAR(11) UNIQUE,
-    tipoUsuario VARCHAR(255) DEFAULT 'Operacional',
-    senha VARCHAR(255),
-    dataContratacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(255) DEFAULT 'Ativo',
-    fkPessoa INT,
-    FOREIGN KEY (fkPessoa) REFERENCES Pessoa(idPessoa) ON DELETE SET NULL,
-    CONSTRAINT ck_tipoUsuario CHECK (tipoUsuario IN ('Operacional', 'Administrador'))
-);
+--   classificacao INT CHECK (classificacao BETWEEN 1 AND 5), RETIRADO
 
 CREATE TABLE IF NOT EXISTS Aeroporto (
   idAeroporto INT AUTO_INCREMENT,
   siglaAeroporto VARCHAR(255),
   nomeAeroporto VARCHAR(100),
   endereco VARCHAR(235),
-  classificacao INT CHECK (classificacao BETWEEN 1 AND 5),
-  Empresa_idEmpresa INT,
-  PRIMARY KEY (idAeroporto),
-  INDEX fk_Aeroporto_Empresa1_idx (Empresa_idEmpresa ASC),
-  CONSTRAINT fk_Aeroporto_Empresa1
-  FOREIGN KEY (Empresa_idEmpresa) REFERENCES Empresa(idEmpresa) ON DELETE SET NULL
+  codigoIATA CHAR(3),
+  cidade VARCHAR(100),
+  estado VARCHAR(100),
+  pais VARCHAR(100),
+  telefone VARCHAR(20),
+  email VARCHAR(100),
+  numeroPistas INT,
+  capacidadePassageiros INT,
+  numeroTerminais INT,
+  horarioAbertura TIME,
+  horarioFechamento TIME,
+  PRIMARY KEY (idAeroporto)
 );
 
+CREATE TABLE IF NOT EXISTS Usuario (
+idUsuario INT AUTO_INCREMENT PRIMARY KEY,       
+  nome VARCHAR(100),                              
+  email VARCHAR(254) UNIQUE,                     
+  cpf CHAR(11) UNIQUE,                            
+  tipoUsuario VARCHAR(255) DEFAULT 'Operacional', 
+  senha VARCHAR(255),                             
+  dataContratacao DATETIME DEFAULT CURRENT_TIMESTAMP, 
+  status VARCHAR(255) DEFAULT 'Ativo',            
+  fkPessoa INT,                                   
+  fkAeroporto INT, 
+  FOREIGN KEY (fkPessoa) REFERENCES Pessoa(idPessoa) ON DELETE SET NULL, 
+  FOREIGN KEY (fkAeroporto) REFERENCES Aeroporto(idAeroporto) ON DELETE SET NULL, 
+  CONSTRAINT ck_tipoUsuario CHECK (tipoUsuario IN ('Operacional', 'Administrador'))
+);
+
+CREATE TABLE IF NOT EXISTS RelacaoAeroporto_Funcionario (
+  Aeroporto_idAeroporto INT,
+  Funcionario_idUsuario INT,
+  dataInicio DATETIME,
+  dataFim DATETIME,
+  PRIMARY KEY (Aeroporto_idAeroporto, Funcionario_idUsuario),
+  FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto) ON DELETE CASCADE,
+  FOREIGN KEY (Funcionario_idUsuario) REFERENCES Usuario(idUsuario) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS Passageiro (
     Passageiro_ID INT AUTO_INCREMENT PRIMARY KEY,
     Nacionalidade VARCHAR(20),
@@ -69,17 +86,18 @@ CREATE TABLE IF NOT EXISTS Passageiro (
     Comentarios_Adicionais TEXT
 );
 
+ 
 CREATE TABLE IF NOT EXISTS PesquisaDeSatisfacao (
     Pesquisa_ID INT PRIMARY KEY,
     Passageiro_ID INT,
     Aeroporto_idAeroporto INT,
     Mes VARCHAR(255),
-    DataPesquisa date,
+    DataPesquisa VARCHAR(10),
     Satisfacao_Geral INT CHECK ( Satisfacao_Geral BETWEEN 1 AND 5),
     FOREIGN KEY (Passageiro_ID) REFERENCES Passageiro(Passageiro_ID),
     FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto)
 );
-
+ 
 CREATE TABLE IF NOT EXISTS Informacoes_Voo (
     Voo_ID INT AUTO_INCREMENT PRIMARY KEY,
     Pesquisa_ID INT,
@@ -91,7 +109,7 @@ CREATE TABLE IF NOT EXISTS Informacoes_Voo (
     Cia_Aerea VARCHAR(255),
     Voo VARCHAR(255),
     Conexao VARCHAR(255),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Aquisição_Passagem (
@@ -100,7 +118,7 @@ CREATE TABLE IF NOT EXISTS Aquisição_Passagem (
     Aquisição_Passagem VARCHAR(255),
     Meio_Aquisição_Passagem VARCHAR(255),
     Meio_Transporte_Aeroporto VARCHAR(255),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Necessidades_Especiais (
@@ -109,7 +127,7 @@ CREATE TABLE IF NOT EXISTS Necessidades_Especiais (
     Possui_Deficiencia VARCHAR(255),
     Utiliza_Recurso_Assistivo VARCHAR(255),
     Solicitou_Assistencia_Especial VARCHAR(255),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Desembarque (
@@ -120,7 +138,7 @@ CREATE TABLE IF NOT EXISTS Desembarque (
     Utilizou_Estacionamento BOOLEAN,
     Facilidade_Desembarque_Meio_Fio INT CHECK (Facilidade_Desembarque_Meio_Fio BETWEEN 1 AND 5),
     Opcoes_Transporte_Aeroporto INT CHECK (Opcoes_Transporte_Aeroporto BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Check_in (
@@ -134,7 +152,7 @@ CREATE TABLE IF NOT EXISTS Check_in (
     Quantidade_Balcoes INT,
     Cordialidade_Funcionarios INT CHECK (Cordialidade_Funcionarios BETWEEN 1 AND 5),
     Tempo_Atendimento INT CHECK (Tempo_Atendimento BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Inspecao_Seguranca (
@@ -144,7 +162,7 @@ CREATE TABLE IF NOT EXISTS Inspecao_Seguranca (
     Tempo_Espera_Fila INT CHECK (Tempo_Espera_Fila BETWEEN 1 AND 5),
     Organizacao_Filas INT CHECK (Organizacao_Filas BETWEEN 1 AND 5),
     Atendimento_Funcionarios INT CHECK (Atendimento_Funcionarios BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Controle_Migratorio_Aduaneiro (
@@ -156,7 +174,7 @@ CREATE TABLE IF NOT EXISTS Controle_Migratorio_Aduaneiro (
     Atendimento_Funcionarios INT CHECK (Atendimento_Funcionarios BETWEEN 1 AND 5),
     Quantidade_Guiches INT,
     Controle_Aduaneiro INT CHECK (Controle_Aduaneiro BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Estabelecimentos (
@@ -170,7 +188,7 @@ CREATE TABLE IF NOT EXISTS Estabelecimentos (
     Quantidade_Estabelecimentos_Comerciais INT CHECK (Quantidade_Estabelecimentos_Comerciais BETWEEN 1 AND 5),
     Qualidade_Variedade_Opcoes_Comerciais INT CHECK (Qualidade_Variedade_Opcoes_Comerciais BETWEEN 1 AND 5),
     Relacao_Preco_Qualidade_Comerciais INT CHECK (Relacao_Preco_Qualidade_Comerciais BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Estacionamento (
@@ -182,7 +200,7 @@ CREATE TABLE IF NOT EXISTS Estacionamento (
     Relacao_Preco_Qualidade INT CHECK (Relacao_Preco_Qualidade BETWEEN 1 AND 5),
     Tempo_Caminhada_Estacionamento_Terminais INT CHECK (Tempo_Caminhada_Estacionamento_Terminais BETWEEN 1 AND 5),
     Tempo_Espera_Onibus_Deslocamento_Estacionamento_Terminais INT CHECK (Tempo_Espera_Onibus_Deslocamento_Estacionamento_Terminais BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Conforto_Acessibilidade (
@@ -201,18 +219,17 @@ CREATE TABLE IF NOT EXISTS Conforto_Acessibilidade (
     Internet_Disponibilizada_Aeroporto INT CHECK (Internet_Disponibilizada_Aeroporto BETWEEN 1 AND 5),
     Velocidade_Conexao INT CHECK (Velocidade_Conexao BETWEEN 1 AND 5),
     Facilidade_Acesso_Rede INT CHECK (Facilidade_Acesso_Rede BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Sanitarios (
     Sanitario_ID INT AUTO_INCREMENT PRIMARY KEY,
     Pesquisa_ID INT,
-    sanitariosQt INT,
     Quantidade_Banheiros INT CHECK (Quantidade_Banheiros BETWEEN 1 AND 5),
     Limpeza_Banheiros INT CHECK (Limpeza_Banheiros BETWEEN 1 AND 5),
     Manutencao_Geral_Sanitarios INT CHECK (Manutencao_Geral_Sanitarios BETWEEN 1 AND 5),
     Limpeza_Geral_Aeroporto INT CHECK (Limpeza_Geral_Aeroporto BETWEEN 1 AND 5),
-    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID)
+    FOREIGN KEY (Pesquisa_ID) REFERENCES PesquisaDeSatisfacao(Pesquisa_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Restituicao_Bagagens (
@@ -234,22 +251,3 @@ CREATE TABLE log (
     descricao TEXT NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-
-select * from log;
-
-select * from Aeroporto;
-select * from Passageiro;
-select * from PesquisaDeSatisfacao;
-select * from Informacoes_Voo;
-select * from Aquisição_Passagem;
-select * from Necessidades_Especiais;
-select * from Desembarque;
-select * from Check_in;
-select * from Inspecao_Seguranca;
-select * from Controle_Migratorio_Aduaneiro;
-select * from Estabelecimentos;
-select * from Estacionamento;
-select * from Conforto_Acessibilidade;
-select * from Sanitarios;
-select * from Restituicao_Bagagens
