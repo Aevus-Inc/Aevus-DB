@@ -60,6 +60,8 @@ idUsuario INT AUTO_INCREMENT PRIMARY KEY,
   CONSTRAINT ck_tipoUsuario CHECK (tipoUsuario IN ('Operacional', 'Administrador'))
 );
 
+
+
 CREATE TABLE IF NOT EXISTS RelacaoAeroporto_Funcionario (
   Aeroporto_idAeroporto INT,
   Funcionario_idUsuario INT,
@@ -75,7 +77,7 @@ CREATE TABLE IF NOT EXISTS Passageiro (
     Genero VARCHAR(20),
     Faixa_Etaria VARCHAR(20),
     Escolaridade VARCHAR(50),
-    Renda_Familiar VARCHAR(30),
+    Renda_Familiar VARCHAR(300),
     Viajando_Sozinho VARCHAR(5),
     Numero_Acompanhantes VARCHAR(20),
     Motivo_Viagem VARCHAR(255),
