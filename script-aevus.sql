@@ -1,4 +1,3 @@
-drop database aevus;
 create database if not exists aevus;
 use aevus;
 
@@ -17,6 +16,9 @@ CREATE TABLE IF NOT EXISTS Empresa (
   CONSTRAINT uk_email UNIQUE (email)
 );
 
+INSERT INTO Empresa (nomeFantasia, cnpj, razaoSocial, email, senha)
+ VALUES 
+ ('Aevus Infinity', '12345678000199', 'Aevus Infinity LTDA', 'testeempresa@teste.com', 'xx123456');
 
 CREATE TABLE IF NOT EXISTS Pessoa (
   idPessoa INT AUTO_INCREMENT,
@@ -24,14 +26,18 @@ CREATE TABLE IF NOT EXISTS Pessoa (
   cpf CHAR(11) UNIQUE,
   PRIMARY KEY (idPessoa)
 );
---   classificacao INT CHECK (classificacao BETWEEN 1 AND 5), RETIRADO
+
+ INSERT INTO Pessoa (nome, cpf)
+ VALUES 
+ ('João Silva', '12345678901'),
+('Maria Santos', '98765432100');
 
 CREATE TABLE IF NOT EXISTS Aeroporto (
   idAeroporto INT AUTO_INCREMENT,
   siglaAeroporto VARCHAR(255),
   nomeAeroporto VARCHAR(100),
   endereco VARCHAR(235),
-  codigoIATA CHAR(3),
+  codigoICAO CHAR(4),
   cidade VARCHAR(100),
   estado VARCHAR(100),
   pais VARCHAR(100),
@@ -46,32 +52,26 @@ CREATE TABLE IF NOT EXISTS Aeroporto (
 );
 
 CREATE TABLE IF NOT EXISTS Usuario (
-idUsuario INT AUTO_INCREMENT PRIMARY KEY,       
-  nome VARCHAR(100),                              
-  email VARCHAR(254) UNIQUE,                     
-  cpf CHAR(11) UNIQUE,                            
+idUsuario INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100),
+  email VARCHAR(254) UNIQUE,
+  cpf CHAR(11) UNIQUE,
   tipoUsuario VARCHAR(255) DEFAULT 'Operacional', 
-  senha VARCHAR(255),                             
+  senha VARCHAR(255),
   dataContratacao DATETIME DEFAULT CURRENT_TIMESTAMP, 
-  status VARCHAR(255) DEFAULT 'Ativo',            
-  fkPessoa INT,                                   
+  status VARCHAR(255) DEFAULT 'Ativo',
+  fkPessoa INT,
   fkAeroporto INT, 
   FOREIGN KEY (fkPessoa) REFERENCES Pessoa(idPessoa) ON DELETE SET NULL, 
   FOREIGN KEY (fkAeroporto) REFERENCES Aeroporto(idAeroporto) ON DELETE SET NULL, 
   CONSTRAINT ck_tipoUsuario CHECK (tipoUsuario IN ('Operacional', 'Administrador'))
 );
 
+INSERT INTO Usuario (nome, email, cpf, tipoUsuario, senha, fkAeroporto, fkPessoa)
+VALUES 
+('João Silva', 'testeop@teste.com', '12345678901', 'Operacional', 'xx123456', 1, 1),
+('Maria Santos', 'testeadm@teste.com', '98765432100', 'Administrador', 'xx123456', 1, 2);
 
-
-CREATE TABLE IF NOT EXISTS RelacaoAeroporto_Funcionario (
-  Aeroporto_idAeroporto INT,
-  Funcionario_idUsuario INT,
-  dataInicio DATETIME,
-  dataFim DATETIME,
-  PRIMARY KEY (Aeroporto_idAeroporto, Funcionario_idUsuario),
-  FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto) ON DELETE CASCADE,
-  FOREIGN KEY (Funcionario_idUsuario) REFERENCES Usuario(idUsuario) ON DELETE CASCADE
-);
 CREATE TABLE IF NOT EXISTS Passageiro (
     Passageiro_ID INT AUTO_INCREMENT PRIMARY KEY,
     Nacionalidade VARCHAR(20),
@@ -89,7 +89,6 @@ CREATE TABLE IF NOT EXISTS Passageiro (
     Comentarios_Adicionais TEXT
 );
 
- 
 CREATE TABLE IF NOT EXISTS PesquisaDeSatisfacao (
     Pesquisa_ID INT PRIMARY KEY,
     Passageiro_ID INT,
@@ -100,7 +99,7 @@ CREATE TABLE IF NOT EXISTS PesquisaDeSatisfacao (
     FOREIGN KEY (Passageiro_ID) REFERENCES Passageiro(Passageiro_ID),
     FOREIGN KEY (Aeroporto_idAeroporto) REFERENCES Aeroporto(idAeroporto)
 );
- 
+
 CREATE TABLE IF NOT EXISTS Informacoes_Voo (
     Voo_ID INT AUTO_INCREMENT PRIMARY KEY,
     Pesquisa_ID INT,
@@ -260,5 +259,3 @@ CREATE TABLE ArquivoProcessado (
     nome_arquivo VARCHAR(255) NOT NULL UNIQUE,
     data_processamento DATETIME NOT NULL
 );
-
-
